@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contractor Field Utility | Project Quote Engine</title>
+    <title>Estimator Pro | Contractor & Vendor Utility</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -35,6 +35,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky; top: 0; z-index: 50;
         }
 
         .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
@@ -54,7 +55,7 @@
         .btn-primary { background: var(--primary); color: white; }
         .btn-secondary { background: var(--border); color: var(--text-primary); }
         .btn-success { background: var(--success); color: white; }
-        .btn-toggle { background: var(--warning); color: #000; }
+        .btn-toggle { background: var(--warning); color: #000; border: 2px solid #000; }
 
         .card {
             background: var(--bg-card);
@@ -93,241 +94,220 @@
 
         .hidden { display: none !important; }
         .badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
-        .badge-contractor { background: rgba(37, 99, 235, 0.2); color: var(--primary); }
-        .badge-vendor { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .badge-contractor { background: rgba(37, 99, 235, 0.2); color: var(--primary); border: 1px solid var(--primary); }
+        .badge-vendor { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+        
+        .scan-record-img { width: 100%; height: 250px; object-fit: cover; border-radius: 12px; margin-bottom: 1.5rem; }
+        .view-banner { background: var(--warning); color: #000; text-align: center; padding: 0.5rem; font-weight: 800; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
+    <div id="vendorBanner" class="view-banner hidden">VENDOR PORTAL ACTIVE: EDITING ESTIMATE & TIMELINE</div>
+
     <header class="header">
         <div>
-            <h2>Estimator Pro</h2>
-            <div id="roleIndicator" class="badge badge-contractor">Main Contractor</div>
+            <h1 style="font-size: 1.2rem;">Estimator Pro</h1>
+            <div id="roleBadge" class="badge badge-contractor">Main Contractor</div>
         </div>
-        <button class="btn btn-toggle" onclick="toggleRole()">Switch Demo Role</button>
+        <button class="btn btn-toggle" onclick="toggleRole()">Switch Demo Perspective</button>
     </header>
 
     <div class="container">
         <div id="dashboardView">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <h1>Active Projects</h1>
-                <button class="btn btn-primary" onclick="showModal('initModal')">+ Start New Project</button>
+                <h1>Active Site Projects</h1>
+                <button class="btn btn-primary" onclick="showModal('initProjectModal')">+ Create New Project</button>
             </div>
+            
             <div class="grid" id="projectList">
-                <p id="emptyState" style="color: var(--text-secondary);">No active projects. Start a project to begin the demo flow.</p>
+                <div class="card" onclick="openProject('p1')">
+                    <p style="color: var(--text-secondary); font-size: 0.7rem; font-weight: bold;">ID: 2026-001</p>
+                    <h3 style="margin: 0.5rem 0;">Master Suite Renovation</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">742 Evergreen Terrace | Springfield</p>
+                    <div style="margin-top: 1rem; display: flex; justify-content: space-between;">
+                        <span class="badge badge-contractor">3 Scan Records</span>
+                        <span style="color: var(--success); font-weight: bold;">Due: 01/20/26</span>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div id="projectDetailView" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <button class="btn btn-secondary" onclick="showDashboard()">← Dashboard</button>
-                <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-success" onclick="generateProjectPDF()">Download Full Project Quote</button>
-                    <button id="archiveAction" class="btn btn-secondary" onclick="archiveCurrentProject()">Archive Project</button>
+                <button class="btn btn-secondary" onclick="showDashboard()">← Back to Site List</button>
+                <div id="contractorActions" style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-success" onclick="generatePDFReport()">Generate Quote Report</button>
+                    <button class="btn btn-secondary" onclick="archiveProject()">Archive Job</button>
                 </div>
             </div>
 
-            <div id="pdfContent" class="card">
-                <div style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem;">
-                    <h2 id="displayJobName" style="font-size: 2rem;">Project Name</h2>
-                    <p id="displayJobInfo" style="color: var(--text-secondary);"></p>
+            <div id="pdfArea" class="card">
+                <div style="margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                    <h1 id="activeProjectTitle" style="font-size: 2.5rem;">Project Title</h1>
+                    <p id="activeProjectMeta" style="color: var(--text-secondary);"></p>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3>Standardized Service Requests</h3>
-                    <button id="contractorAddBtn" class="btn btn-primary" onclick="openRequestModal()">+ Add Photo & Request Info</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3>Field Service Requests</h3>
+                    <button id="addScanBtn" class="btn btn-primary" onclick="simulateCamera()">+ Add New Photo/Scan</button>
                 </div>
 
-                <div id="requestGrid" class="grid">
+                <div id="scanRecordsContainer" class="grid">
                     </div>
             </div>
         </div>
     </div>
 
-    <div id="initModal" class="modal hidden">
+    <div id="initProjectModal" class="modal hidden">
         <div class="modal-content">
-            <h2 style="margin-bottom: 1.5rem;">Project Initiation</h2>
-            <div class="form-group"><label>Client Name</label><input type="text" id="mClient" placeholder="e.g. Anderson Residence"></div>
-            <div class="form-group"><label>Job Site Address</label><input type="text" id="mAddress" placeholder="Full Site Address"></div>
-            <div class="form-group">
-                <label>Project Type</label>
-                <select id="mType">
-                    <option value="Residential Remodel">Residential Remodel</option>
-                    <option value="Drywall/Paint Restoration">Drywall/Paint Restoration</option>
-                    <option value="General Construction">General Construction</option>
-                    <option value="Service/Repair">Service/Repair</option>
-                </select>
-            </div>
-            <div class="form-group"><label>Target Completion Date</label><input type="date" id="mDate"></div>
+            <h2 style="margin-bottom: 1.5rem;">Step 1: Project Initiation</h2>
+            <div class="form-group"><label>Client Name</label><input type="text" id="mClient" placeholder="e.g. Jane Anderson"></div>
+            <div class="form-group"><label>Job Site Address</label><input type="text" id="mAddress" placeholder="Full Project Address"></div>
+            <div class="form-group"><label>Initial Target Completion Date</label><input type="date" id="mDate"></div>
             <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                <button class="btn btn-primary" onclick="createNewProject()">Initiate Project</button>
-                <button class="btn btn-secondary" onclick="hideModal('initModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveProject()">Initiate Project</button>
+                <button class="btn btn-secondary" onclick="hideModal('initProjectModal')">Cancel</button>
             </div>
         </div>
     </div>
 
     <div id="requestModal" class="modal hidden">
         <div class="modal-content">
-            <h2 style="margin-bottom: 1rem;">Field Request Details</h2>
-            <div style="background: #000; border-radius: 8px; margin-bottom: 1.5rem; text-align: center; padding: 1rem;">
-                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.5rem;">[Placeholder: Uploaded Job Photo]</p>
-                <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600" style="max-height: 200px; border-radius: 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2>Field Request Detail</h2>
+                <button class="btn btn-secondary" onclick="hideModal('requestModal')">✕</button>
             </div>
-
+            
+            <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800" class="scan-record-img">
+            
             <div id="contractorInputs">
+                <div class="form-group"><label>Area / Location</label><input type="text" class="c-input" value="Master Bath - South Wall"></div>
                 <div class="form-group">
-                    <label>Area of Service</label>
-                    <select id="rArea">
-                        <option>Ceiling</option><option>Walls</option><option>Trim/Baseboard</option><option>Exterior</option>
-                    </select>
+                    <label>Texture</label>
+                    <select class="c-input"><option>Smooth Drywall</option><option>Orange Peel</option><option>Popcorn</option></select>
                 </div>
-                <div class="form-group">
-                    <label>Texture Type</label>
-                    <select id="rTexture">
-                        <option>Smooth</option><option>Orange Peel</option><option>Popcorn</option><option>Knockdown</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>Color / Paint Code</label><input type="text" id="rColor" placeholder="e.g. SW 7006"></div>
-                <div class="form-group"><label>Dimensions (sq ft / linear ft)</label><input type="text" id="rDims"></div>
-                <div class="form-group"><label>Required Action / Notes</label><textarea id="rNotes" rows="2"></textarea></div>
+                <div class="form-group"><label>Color / Paint Code</label><input type="text" class="c-input" value="SW 7006 Off-White"></div>
+                <div class="form-group"><label>Dimensions</label><input type="text" class="c-input" value="12ft x 14ft"></div>
+                <div class="form-group"><label>Required Action / Notes</label><textarea class="c-input" rows="3">Damage from plumbing leak. Requires structural repair and texturing.</textarea></div>
             </div>
 
-            <div id="vendorInputs" class="hidden" style="border-top: 2px solid var(--warning); padding-top: 1.5rem; margin-top: 1.5rem;">
-                <h3 style="color: var(--warning); margin-bottom: 1rem;">Vendor Estimate Entry</h3>
-                <div class="form-group"><label>Estimate Pricing ($)</label><input type="number" id="vPrice"></div>
-                <div class="form-group"><label>Timeline Notes / Questions</label><textarea id="vTimeline" rows="2"></textarea></div>
-                <button class="btn btn-primary" style="width: 100%;" onclick="saveVendorEntry()">Submit Pricing to Contractor</button>
+            <div id="vendorAssignment" style="border-top: 1px solid var(--border); padding-top: 1.5rem; margin-top: 1.5rem;">
+                <label>Select Vendor for Bid</label>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <select id="vendorSelect" style="flex: 1;">
+                        <option>Elite Paint & Drywall (elite@example.com)</option>
+                        <option>Perfect Finish Inc (bids@finish.com)</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="alert('Vendor Management Portal Opened')">+ Add Vendor</button>
+                </div>
+                <button id="sendInfoBtn" class="btn btn-primary" style="width: 100%;" onclick="alert('Project Data & Secure Link Sent to Vendor!')">Send Information to Vendor</button>
             </div>
 
-            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                <button id="saveRequestBtn" class="btn btn-primary" onclick="saveRequest()">Save Request Data</button>
-                <button class="btn btn-secondary" onclick="hideModal('requestModal')">Close</button>
+            <div id="vendorResponse" class="hidden" style="border-top: 2px solid var(--warning); padding-top: 1.5rem; margin-top: 1.5rem;">
+                <h3 style="color: var(--warning); margin-bottom: 1rem;">Subcontractor Bid & Timeline</h3>
+                <div class="form-group"><label>Estimate Price ($)</label><input type="number" id="vPrice" placeholder="0.00"></div>
+                <div class="form-group"><label>Upload formal Quote (Photo)</label><button class="btn btn-secondary" style="width: 100%;">📷 Capture Document</button></div>
+                <div class="form-group"><label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox"> Sent Estimate via Email
+                </label></div>
+                <div class="form-group"><label>Estimated Start Date</label><input type="date"></div>
+                <div class="form-group"><label>Timeline Justification Notes</label><textarea rows="2" placeholder="e.g. Requires 3 days for curing..."></textarea></div>
+                <button class="btn btn-primary" style="width: 100%;" onclick="saveVendorBid()">Submit Estimate & Timeline</button>
             </div>
         </div>
     </div>
 
     <script>
-        let projects = [];
-        let activeProjectId = null;
-        let role = 'contractor';
+        let role = 'contractor'; // contractor | vendor
 
+        // Role Toggling Logic
         function toggleRole() {
             role = (role === 'contractor') ? 'vendor' : 'contractor';
-            document.getElementById('roleIndicator').innerText = (role === 'contractor') ? 'Main Contractor' : 'Subcontractor';
-            document.getElementById('roleIndicator').className = 'badge ' + (role === 'contractor' ? 'badge-contractor' : 'badge-vendor');
+            document.getElementById('roleBadge').innerText = (role === 'contractor') ? 'Main Contractor' : 'Subcontractor';
+            document.getElementById('roleBadge').className = 'badge ' + (role === 'contractor' ? 'badge-contractor' : 'badge-vendor');
             
-            document.getElementById('vendorInputs').classList.toggle('hidden');
-            document.getElementById('contractorAddBtn').classList.toggle('hidden');
-            document.getElementById('archiveAction').classList.toggle('hidden');
+            document.getElementById('vendorBanner').classList.toggle('hidden');
+            document.getElementById('vendorResponse').classList.toggle('hidden');
+            document.getElementById('vendorAssignment').classList.toggle('hidden');
+            document.getElementById('contractorActions').classList.toggle('hidden');
+            document.getElementById('addScanBtn').classList.toggle('hidden');
             
-            const inputs = document.querySelectorAll('#contractorInputs input, #contractorInputs select, #contractorInputs textarea');
-            inputs.forEach(i => i.disabled = (role === 'vendor'));
+            // Lock contractor fields for vendors
+            document.querySelectorAll('.c-input').forEach(input => {
+                input.disabled = (role === 'vendor');
+            });
         }
 
-        function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-        function createNewProject() {
-            const project = {
-                id: Date.now(),
-                client: document.getElementById('mClient').value,
-                address: document.getElementById('mAddress').value,
-                type: document.getElementById('mType').value,
-                date: document.getElementById('mDate').value,
-                requests: []
-            };
-            projects.push(project);
-            activeProjectId = project.id;
-            updateDashboard();
-            openProject(project.id);
-            hideModal('initModal');
-        }
-
-        function updateDashboard() {
-            const list = document.getElementById('projectList');
-            if(projects.length > 0) document.getElementById('emptyState').classList.add('hidden');
-            list.innerHTML = projects.map(p => `
-                <div class="card" onclick="openProject(${p.id})">
-                    <p style="font-size: 0.75rem; color: var(--text-secondary);">${p.type}</p>
-                    <h3>${p.client}</h3>
-                    <p>${p.address}</p>
-                    <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--success);">Target Completion: ${p.date}</p>
-                </div>
-            `).join('');
-        }
-
-        function openProject(id) {
-            activeProjectId = id;
-            const p = projects.find(item => item.id === id);
-            document.getElementById('displayJobName').innerText = p.client;
-            document.getElementById('displayJobInfo').innerText = `${p.type} | ${p.address} | Due: ${p.date}`;
-            renderRequests();
-            document.getElementById('dashboardView').classList.add('hidden');
-            document.getElementById('projectDetailView').classList.remove('hidden');
-        }
-
+        // View Management
         function showDashboard() {
             document.getElementById('dashboardView').classList.remove('hidden');
             document.getElementById('projectDetailView').classList.add('hidden');
         }
 
-        function openRequestModal() {
-            if(role === 'vendor') return;
+        function openProject(id) {
+            document.getElementById('activeProjectTitle').innerText = "Master Suite Renovation";
+            document.getElementById('activeProjectMeta').innerText = "Location: 742 Evergreen Terrace | Manager: J. Smith | Target: 01/20/2026";
+            renderScanRecords();
+            document.getElementById('dashboardView').classList.add('hidden');
+            document.getElementById('projectDetailView').classList.remove('hidden');
+        }
+
+        function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // Simulation Functions
+        function simulateCamera() {
+            alert("Step 2: Activating Device Camera...\nSimulating High-Res Photo Capture.");
             showModal('requestModal');
         }
 
-        function saveRequest() {
-            const p = projects.find(item => item.id === activeProjectId);
-            p.requests.push({
-                area: document.getElementById('rArea').value,
-                texture: document.getElementById('rTexture').value,
-                color: document.getElementById('rColor').value,
-                dims: document.getElementById('rDims').value,
-                notes: document.getElementById('rNotes').value,
-                price: 'Pending'
-            });
-            renderRequests();
+        function saveProject() {
+            const name = document.getElementById('mClient').value;
+            alert(`Step 1 Complete: Project '${name}' initiated.`);
+            hideModal('initProjectModal');
+            openProject('p1');
+        }
+
+        function saveVendorBid() {
+            const price = document.getElementById('vPrice').value;
+            alert(`Step 4 Complete: Estimate of $${price} and timeline submitted back to Main Contractor.`);
             hideModal('requestModal');
         }
 
-        function renderRequests() {
-            const p = projects.find(item => item.id === activeProjectId);
-            const grid = document.getElementById('requestGrid');
-            grid.innerHTML = p.requests.map(r => `
-                <div class="card" style="border-left: 4px solid var(--primary);" onclick="showModal('requestModal')">
-                    <h4>${r.area}</h4>
-                    <p style="font-size: 0.85rem; color: var(--text-secondary);">${r.texture} | ${r.dims}</p>
-                    <div style="margin-top: 1rem; display: flex; justify-content: space-between;">
-                        <span style="font-weight: bold;">Estimate: ${r.price === 'Pending' ? r.price : '$'+r.price}</span>
+        function archiveProject() {
+            alert("Step 5: Project moved from Dashboard to Project Archive.");
+            showDashboard();
+        }
+
+        function renderScanRecords() {
+            const container = document.getElementById('scanRecordsContainer');
+            container.innerHTML = `
+                <div class="card" onclick="showModal('requestModal')">
+                    <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400" style="width:100%; border-radius:8px; margin-bottom:1rem;">
+                    <h4>Wall Restoration - Zone A</h4>
+                    <p style="font-size:0.75rem; color:var(--text-secondary);">Smooth | SW 7006 | 12x14</p>
+                    <div style="margin-top:1rem; padding-top:1rem; border-top: 1px solid var(--border); display:flex; justify-content:space-between;">
+                        <span style="font-weight: bold;">Estimate: $1,250.00</span>
+                        <span class="badge badge-vendor">Bid Received</span>
                     </div>
                 </div>
-            `).join('');
+            `;
         }
 
-        function saveVendorEntry() {
-            const p = projects.find(item => item.id === activeProjectId);
-            if(p.requests.length > 0) {
-                p.requests[p.requests.length - 1].price = document.getElementById('vPrice').value;
-            }
-            renderRequests();
-            hideModal('requestModal');
-            alert("Pricing communicated to Main Contractor.");
-        }
-
-        function archiveCurrentProject() {
-            projects = projects.filter(p => p.id !== activeProjectId);
-            updateDashboard();
-            showDashboard();
-            alert("Project moved to archive.");
-        }
-
-        function generateProjectPDF() {
+        async function generatePDFReport() {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const content = document.getElementById('pdfContent');
-            html2canvas(content).then(canvas => {
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const element = document.getElementById('pdfArea');
+            
+            alert("Step 5: Compiling Line Items, Photos, and Bids into a Professional Quote Report...");
+            
+            html2canvas(element).then(canvas => {
                 const imgData = canvas.toDataURL('image/png');
-                doc.addImage(imgData, 'PNG', 10, 10, 190, 0);
+                const imgProps = doc.getImageProperties(imgData);
+                const pdfWidth = doc.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
                 doc.save("Project_Quote_Report.pdf");
             });
         }
