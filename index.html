@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contractor Field Utility | Unified Estimation Tool</title>
+    <title>Contractor Field Utility | Professional Quote Engine</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.autotable.min.js"></script>
+
     <style>
         :root {
             --primary: #2563eb;
@@ -17,17 +19,20 @@
             --border: #334155;
             --success: #10b981;
             --warning: #f59e0b;
+            --danger: #ef4444;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background: var(--bg-dark);
             color: var(--text-primary);
             line-height: 1.6;
             min-height: 100vh;
         }
 
+        /* HEADER & NAVIGATION */
         .header {
             background: var(--bg-card);
             padding: 1rem 1.5rem;
@@ -35,10 +40,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky; top: 0; z-index: 50;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-
-        .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
 
         .view-banner { 
             background: var(--warning); 
@@ -48,18 +53,44 @@
             font-weight: 800; 
             font-size: 0.75rem; 
             text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+        /* DASHBOARD & GRIDS */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .card:hover { border-color: var(--primary); transform: translateY(-3px); }
+        .card.action-card { border: 2px dashed var(--primary); text-align: center; }
+
+        /* BUTTONS */
         .btn {
-            padding: 0.75rem 1.25rem;
+            padding: 0.75rem 1.5rem;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             border: none;
-            transition: all 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
         }
 
         .btn-primary { background: var(--primary); color: white; }
@@ -67,247 +98,247 @@
         .btn-success { background: var(--success); color: white; }
         .btn-toggle { background: var(--warning); color: #000; border: 2px solid #000; }
 
-        .card {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 1.5rem;
-            border: 1px solid var(--border);
-            margin-bottom: 1.5rem;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .modal {
+        /* FORMS & MODALS */
+        .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85);
             display: flex; align-items: center; justify-content: center;
-            z-index: 100; padding: 1rem;
+            z-index: 200; padding: 1rem;
         }
 
         .modal-content {
             background: var(--bg-card);
             width: 100%; max-width: 650px;
-            border-radius: 16px; padding: 2rem;
-            max-height: 95vh; overflow-y: auto;
+            border-radius: 16px; padding: 2.5rem;
+            max-height: 90vh; overflow-y: auto;
+            border: 1px solid var(--border);
         }
 
-        .form-group { margin-bottom: 1.25rem; }
-        label { display: block; color: var(--text-secondary); margin-bottom: 0.4rem; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+        
         input, select, textarea {
-            width: 100%; padding: 0.8rem;
+            width: 100%; padding: 0.85rem;
             background: var(--bg-dark); border: 1px solid var(--border);
             border-radius: 8px; color: white; font-size: 1rem;
         }
 
-        .scan-img-placeholder {
-            width: 100%; height: 200px;
-            background: #000;
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 1.5rem;
-            color: var(--text-secondary);
-            border: 2px dashed var(--border);
+        input:disabled, select:disabled, textarea:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* SCAN RECORD COMPONENTS */
+        .placeholder-img {
+            width: 100%; height: 240px;
+            background: #000; border-radius: 12px;
+            margin-bottom: 1.5rem; object-fit: cover;
+            border: 1px solid var(--border);
         }
 
         .hidden { display: none !important; }
-        .badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+        
+        .badge {
+            padding: 0.35rem 0.65rem; border-radius: 4px;
+            font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
+        }
         .badge-contractor { background: rgba(37, 99, 235, 0.2); color: var(--primary); border: 1px solid var(--primary); }
         .badge-vendor { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
     </style>
 </head>
 <body>
 
-    <div id="vendorBanner" class="view-banner hidden">Vendor Mode: Inputting Estimate & Timeline Justification</div>
+    <div id="vendorBanner" class="view-banner hidden">Vendor/Subcontractor View: Estimate & Timeline Submission Mode</div>
 
     <header class="header">
         <div>
-            <h2 style="font-size: 1.2rem;">Estimator Pro</h2>
-            <div id="roleBadge" class="badge badge-contractor">Main Contractor</div>
+            <h1 style="font-size: 1.3rem; font-weight: 900;">Field Estimator Pro</h1>
+            <span id="roleBadge" class="badge badge-contractor">Main Contractor</span>
         </div>
-        <button class="btn btn-toggle" onclick="toggleRole()">Switch Demo Perspective</button>
+        <button class="btn btn-toggle" onclick="toggleRole()">Switch Demo Role</button>
     </header>
 
     <div class="container">
         <div id="dashboardView">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <h1>Active Projects</h1>
-                <div id="contractorDashboardActions">
-                    <button class="btn btn-primary" onclick="showModal('initProjectModal')">+ Create New Project</button>
-                    <button class="btn btn-secondary" onclick="alert('Archive View Selected')">Project Archive</button>
-                </div>
+                <h1>Active Job Sites</h1>
+                <button class="btn btn-primary" id="contractorMainBtn" onclick="openModal('initProjectModal')">+ Create New Project</button>
             </div>
+            
             <div class="grid" id="projectGrid">
                 </div>
+
+            <h2 style="margin: 3rem 0 1.5rem; color: var(--text-secondary);">Project Archive</h2>
+            <div class="grid" id="archiveGrid">
+                <p style="color: var(--text-secondary);">Archived projects appear here once completed.</p>
+            </div>
         </div>
 
         <div id="projectDetailView" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <button class="btn btn-secondary" onclick="showDashboard()">← Back to Dashboard</button>
-                <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-success" onclick="generateReport()">Download Full Quote Report</button>
-                    <button id="archiveBtn" class="btn btn-secondary" onclick="showDashboard()">Archive Job</button>
+                <button class="btn btn-secondary" onclick="showDashboard()">← Dashboard</button>
+                <div style="display: flex; gap: 0.75rem;">
+                    <button class="btn btn-success" onclick="generateFormalReport()">Generate Professional Quote</button>
+                    <button class="btn btn-secondary" id="archiveJobBtn" onclick="archiveCurrentProject()">Archive Project</button>
                 </div>
             </div>
 
-            <div id="reportTarget" class="card">
-                <div style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem;">
-                    <h1 id="activeProjectTitle" style="font-size: 2.5rem;">Project Name</h1>
-                    <p id="activeProjectInfo" style="color: var(--text-secondary);"></p>
+            <div class="card" id="projectInfoHeader">
+                <h1 id="activeProjectTitle" style="font-size: 2.2rem; margin-bottom: 0.5rem;">Job Name</h1>
+                <p id="activeProjectMeta" style="color: var(--text-secondary); margin-bottom: 1.5rem;"></p>
+                <div style="display: flex; gap: 1rem;">
+                    <span id="targetDateBadge" class="badge badge-contractor">Target Date: --</span>
                 </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h3>Project Scan Records</h3>
-                    <button id="contractorAddScanBtn" class="btn btn-primary" onclick="initiateScan()">+ Add New Scan/Photo</button>
-                </div>
-
-                <div id="scanGrid" class="grid">
-                    </div>
             </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 2rem 0 1rem;">
+                <h3>Field Documentation & Service Requests</h3>
+                <button class="btn btn-primary" id="contractorScanBtn" onclick="simulateFieldCapture()">+ Add New Scan/Photo</button>
+            </div>
+
+            <div class="grid" id="scanGrid">
+                </div>
         </div>
     </div>
 
-    <div id="initProjectModal" class="modal hidden">
+    <div id="initProjectModal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2 style="margin-bottom: 1.5rem;">Step 1: Project Initiation</h2>
-            <div class="form-group"><label>Client Name</label><input type="text" id="pClient" placeholder="e.g. Anderson Residence"></div>
-            <div class="form-group"><label>Job Site Address</label><input type="text" id="pAddress" placeholder="Full Site Address"></div>
-            <div class="form-group"><label>Project Manager</label><input type="text" id="pManager" placeholder="Name of Manager"></div>
-            <div class="form-group"><label>Initial Target Completion Date</label><input type="date" id="pDate"></div>
-            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                <button class="btn btn-primary" onclick="saveNewProject()">Initiate Project</button>
-                <button class="btn btn-secondary" onclick="hideModal('initProjectModal')">Cancel</button>
+            <div class="form-group"><label>Client Name</label><input type="text" id="mClient" placeholder="e.g., Anderson Residence"></div>
+            <div class="form-group"><label>Job Site Address</label><input type="text" id="mAddress" placeholder="Full Site Address"></div>
+            <div class="form-group"><label>Project Manager</label><input type="text" id="mManager" placeholder="Field Lead Name"></div>
+            <div class="form-group"><label>Initial Target Completion Date</label><input type="date" id="mTargetDate"></div>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="initiateProject()">Initiate Project</button>
+                <button class="btn btn-secondary" onclick="closeModal('initProjectModal')">Cancel</button>
             </div>
         </div>
     </div>
 
-    <div id="scanModal" class="modal hidden">
+    <div id="scanModal" class="modal-overlay hidden">
         <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h2 id="scanTitle">Field Data Capture</h2>
-                <button class="btn btn-secondary" onclick="hideModal('scanModal')">✕</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 id="modalScanTitle">Scan Record Detail</h2>
+                <button class="btn btn-secondary" onclick="closeModal('scanModal')">✕</button>
             </div>
             
-            <div class="scan-img-placeholder">
-                <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
-            </div>
+            <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800" class="placeholder-img" alt="Field Capture">
 
-            <div id="contractorInputFields">
-                <div class="form-group"><label>Area</label><input type="text" class="c-input" id="rArea" placeholder="e.g. Master Bedroom Ceiling"></div>
+            <div id="contractorFields">
+                <div class="form-group"><label>Area / Location</label><input type="text" class="c-input" id="rArea" placeholder="e.g., Master Suite Ceiling"></div>
                 <div class="form-group">
                     <label>Texture</label>
                     <select class="c-input" id="rTexture">
-                        <option>Smooth Drywall</option><option>Stucco</option><option>Popcorn</option>
+                        <option>Smooth Drywall</option><option>Orange Peel</option><option>Popcorn</option><option>Stucco</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Color / Paint Code</label><input type="text" class="c-input" id="rColor" placeholder="e.g. SW 7006 Off-White"></div>
-                <div class="form-group"><label>Dimensions</label><input type="text" class="c-input" id="rDims" placeholder="e.g. 12ft x 14ft"></div>
-                <div class="form-group"><label>Required Action/Notes</label><textarea class="c-input" id="rNotes" rows="2" placeholder="Describe damage..."></textarea></div>
-            </div>
-
-            <div id="handoffSection" style="border-top: 1px solid var(--border); padding-top: 1.5rem; margin-top: 1.5rem;">
-                <label>Select Vendor for Estimate</label>
-                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                    <select id="vendorSelect" style="flex:1;">
-                        <option>Mainline Drywall (bids@mainline.com)</option>
-                        <option>Elite Paint Services (service@elite.com)</option>
-                    </select>
-                    <button class="btn btn-secondary" onclick="alert('Opening Vendor Management...')">+ Add Vendor</button>
+                <div class="form-group"><label>Color / Paint Code</label><input type="text" class="c-input" id="rColor" placeholder="e.g., SW 7006 Off-White"></div>
+                <div class="form-group"><label>Dimensions</label><input type="text" class="c-input" id="rDims" placeholder="e.g., 12ft x 14ft"></div>
+                <div class="form-group"><label>Required Action / Field Notes</label><textarea class="c-input" id="rNotes" rows="3" placeholder="Describe damage or service needed..."></textarea></div>
+                
+                <div id="vendorAssignment" style="background: rgba(37, 99, 235, 0.1); padding: 1rem; border-radius: 8px; border: 1px solid var(--primary);">
+                    <label>Assigned Vendor/Subcontractor</label>
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                        <select id="rVendor" style="flex: 1;">
+                            <option>Mainline Drywall & Paint (bids@mainline.com)</option>
+                            <option>Elite Finish Inc (service@elitefinish.com)</option>
+                            <option>Precision Texture (quotes@pretexture.com)</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="alert('Vendor Management Portal Opened')">+ Add</button>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="alert('Project link and field data sent to vendor via secure email.')">Send Information to Vendor</button>
                 </div>
-                <button class="btn btn-primary" style="width:100%;" onclick="alert('Project Link & Data Sent to Vendor via Secure Link!')">Send Information to Vendor</button>
             </div>
 
-            <div id="vendorInputFields" class="hidden" style="border-top: 2px solid var(--warning); padding-top: 1.5rem; margin-top: 1.5rem;">
-                <h3 style="color: var(--warning); margin-bottom: 1rem;">Subcontractor Bid & Timeline</h3>
-                <div class="form-group"><label>Estimate Price ($)</label><input type="number" id="vPrice" placeholder="0.00"></div>
-                <div class="form-group"><label>Upload Pic of Estimate</label><button class="btn btn-secondary" style="width:100%" onclick="alert('Camera Activation Simulated')">📷 Capture Formal Quote Document</button></div>
-                <div class="form-group"><label style="display:flex; align-items:center; gap:0.5rem;"><input type="checkbox" id="vEmailCheck"> Sent Estimate via Email</label></div>
-                <div class="form-group"><label>Estimated Start Date</label><input type="date" id="vDate"></div>
-                <div class="form-group"><label>Timeline Notes / Justification</label><textarea id="vNotes" rows="2" placeholder="e.g. Requires 3 days for curing..."></textarea></div>
-                <button class="btn btn-primary" style="width:100%;" onclick="submitVendorBid()">Submit Estimate & Timeline</button>
+            <div id="vendorFields" class="hidden" style="border-top: 2px solid var(--warning); padding-top: 1.5rem; margin-top: 1.5rem;">
+                <h3 style="color: var(--warning); margin-bottom: 1.2rem;">Vendor Estimate & Timeline Response</h3>
+                <div class="form-group"><label>Estimate Pricing ($)</label><input type="number" id="vPrice" placeholder="0.00"></div>
+                <div class="form-group"><label>Upload formal Quote Photo/PDF</label><button class="btn btn-secondary" style="width: 100%;" onclick="alert('Camera/Document selector opened.')">📷 Upload Pic of Estimate</button></div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <input type="checkbox" id="vEmailCheck" style="width: auto;"> <label style="margin: 0;">Check if estimate is sent via email</label>
+                </div>
+                <div class="form-group"><label>Estimated Start Date</label><input type="date" id="vStartDate"></div>
+                <div class="form-group"><label>Timeline Justification Notes</label><textarea id="vTimelineNotes" rows="2" placeholder="e.g., Material lead time is 3 days..."></textarea></div>
+                <button class="btn btn-primary" style="width: 100%;" onclick="submitVendorBid()">Submit Estimate & Timeline</button>
             </div>
 
             <div style="margin-top: 2rem;">
-                <button id="contractorSaveBtn" class="btn btn-primary" onclick="saveScanRecord()">Save Field Documentation</button>
+                <button id="saveScanBtn" class="btn btn-primary" onclick="saveScanRecord()">Save Documentation</button>
             </div>
         </div>
     </div>
 
     <script>
-        // DATA OBJECTS
-        let currentRole = 'contractor';
+        // CORE STATE MANAGEMENT
+        let currentRole = 'contractor'; // contractor | vendor
         let projects = [];
-        let activeProject = null;
+        let activeProjectId = null;
 
-        // NAVIGATION & TOGGLE (STEP 3/4 LOGIC)
+        // STEP 3: ROLE TOGGLING (FOR DEMO PURPOSES)
         function toggleRole() {
             currentRole = (currentRole === 'contractor') ? 'vendor' : 'contractor';
+            
+            // Update UI
             document.getElementById('roleBadge').innerText = (currentRole === 'contractor') ? 'Main Contractor' : 'Subcontractor';
             document.getElementById('roleBadge').className = 'badge ' + (currentRole === 'contractor' ? 'badge-contractor' : 'badge-vendor');
             document.getElementById('vendorBanner').classList.toggle('hidden');
-            document.getElementById('vendorInputFields').classList.toggle('hidden');
-            document.getElementById('handoffSection').classList.toggle('hidden');
-            document.getElementById('contractorDashboardActions').classList.toggle('hidden');
-            document.getElementById('contractorAddScanBtn').classList.toggle('hidden');
-            document.getElementById('contractorSaveBtn').classList.toggle('hidden');
+            document.getElementById('vendorFields').classList.toggle('hidden');
+            document.getElementById('vendorAssignment').classList.toggle('hidden');
+            document.getElementById('contractorMainBtn').classList.toggle('hidden');
+            document.getElementById('contractorScanBtn').classList.toggle('hidden');
+            document.getElementById('archiveJobBtn').classList.toggle('hidden');
+            document.getElementById('saveScanBtn').classList.toggle('hidden');
             
-            document.querySelectorAll('.c-input').forEach(i => i.disabled = (currentRole === 'vendor'));
+            // Step 3 logic: Lock contractor inputs for vendors
+            document.querySelectorAll('.c-input').forEach(input => {
+                input.disabled = (currentRole === 'vendor');
+            });
+            
+            alert(`Switched to ${currentRole.toUpperCase()} mode for the demo lifecycle.`);
         }
 
-        function showView(id) {
-            document.getElementById('dashboardView').classList.add('hidden');
+        // NAVIGATION
+        function showDashboard() {
+            document.getElementById('dashboardView').classList.remove('hidden');
             document.getElementById('projectDetailView').classList.add('hidden');
-            document.getElementById(id).classList.remove('hidden');
+            updateDashboardGrids();
         }
 
-        function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        function showDashboard() { showView('dashboardView'); }
-
-        // STEP 1: PROJECT INITIATION
-        function saveNewProject() {
+        // STEP 1: PROJECT INITIATION [cite: 16-19]
+        function initiateProject() {
             const p = {
                 id: Date.now(),
-                client: document.getElementById('pClient').value,
-                address: document.getElementById('pAddress').value,
-                manager: document.getElementById('pManager').value,
-                targetDate: document.getElementById('pDate').value,
+                client: document.getElementById('mClient').value,
+                address: document.getElementById('mAddress').value,
+                manager: document.getElementById('mManager').value,
+                targetDate: document.getElementById('mTargetDate').value,
+                status: 'Active',
                 scans: []
             };
+            if(!p.client || !p.address) return alert("Client and Address are required.");
+            
             projects.push(p);
-            activeProject = p;
-            updateDashboard();
-            hideModal('initProjectModal');
-            openProject(p.id);
+            activeProjectId = p.id;
+            closeModal('initProjectModal');
+            showProjectDetail(p.id);
         }
 
-        function updateDashboard() {
-            const list = document.getElementById('projectGrid');
-            list.innerHTML = projects.map(p => `
-                <div class="card" onclick="openProject(${p.id})">
-                    <p style="font-size:0.7rem; color:var(--text-secondary);">CLIENT: ${p.client}</p>
-                    <h3>${p.address}</h3>
-                    <p style="margin-top:1rem; font-size:0.8rem; color:var(--success);">Target: ${p.targetDate}</p>
-                </div>
-            `).join('');
+        function showProjectDetail(id) {
+            activeProjectId = id;
+            const p = projects.find(item => item.id === id);
+            
+            document.getElementById('activeProjectTitle').innerText = p.client;
+            document.getElementById('activeProjectMeta').innerText = `${p.address} | Manager: ${p.manager}`;
+            document.getElementById('targetDateBadge').innerText = `Target Date: ${p.targetDate}`;
+            
+            renderScanGrid();
+            document.getElementById('dashboardView').classList.add('hidden');
+            document.getElementById('projectDetailView').classList.remove('hidden');
         }
 
-        // STEP 2: FIELD DATA CAPTURE
-        function openProject(id) {
-            activeProject = projects.find(p => p.id === id);
-            document.getElementById('activeProjectTitle').innerText = activeProject.client;
-            document.getElementById('activeProjectInfo').innerText = `Address: ${activeProject.address} | PM: ${activeProject.manager} | Target: ${activeProject.targetDate}`;
-            renderScans();
-            showView('projectDetailView');
-        }
-
-        function initiateScan() {
-            if(currentRole === 'vendor') return;
-            alert("Activating Camera... Photo Captured.");
-            showModal('scanModal');
+        // STEP 2: FIELD DATA CAPTURE [cite: 20-30]
+        function simulateFieldCapture() {
+            alert("Step 2: Activating Phone Camera... Photo Captured.");
+            openModal('scanModal');
         }
 
         function saveScanRecord() {
@@ -318,52 +349,152 @@
                 color: document.getElementById('rColor').value,
                 dims: document.getElementById('rDims').value,
                 notes: document.getElementById('rNotes').value,
-                bid: 'Pending'
+                vendor: document.getElementById('rVendor').value,
+                bid: 'Pending',
+                vDate: '',
+                vNotes: ''
             };
-            activeProject.scans.push(scan);
-            renderScans();
-            hideModal('scanModal');
+            
+            const p = projects.find(item => item.id === activeProjectId);
+            p.scans.push(scan);
+            
+            renderScanGrid();
+            closeModal('scanModal');
+            // Reset fields
+            document.getElementById('rArea').value = '';
+            document.getElementById('rNotes').value = '';
         }
 
-        function renderScans() {
+        // STEP 4: ESTIMATE & TIMELINE SUBMISSION [cite: 36-46]
+        function submitVendorBid() {
+            const bid = document.getElementById('vPrice').value;
+            const startDate = document.getElementById('vStartDate').value;
+            const notes = document.getElementById('vTimelineNotes').value;
+            
+            const p = projects.find(item => item.id === activeProjectId);
+            if(p.scans.length > 0) {
+                // For demo, apply to the last scan opened
+                const scan = p.scans[p.scans.length - 1];
+                scan.bid = bid;
+                scan.vDate = startDate;
+                scan.vNotes = notes;
+            }
+            
+            renderScanGrid();
+            closeModal('scanModal');
+            alert("Step 4 Complete: Estimate and Timeline justification sent to Contractor.");
+        }
+
+        // RENDER LOGIC
+        function renderScanGrid() {
+            const p = projects.find(item => item.id === activeProjectId);
             const grid = document.getElementById('scanGrid');
-            grid.innerHTML = activeProject.scans.map(s => `
-                <div class="card" style="border-left:4px solid var(--primary);" onclick="showModal('scanModal')">
-                    <h4>${s.area}</h4>
-                    <p style="font-size:0.8rem; color:var(--text-secondary);">${s.texture} | ${s.dims}</p>
-                    <div style="margin-top:1rem; display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-weight:bold;">Bid: ${s.bid === 'Pending' ? s.bid : '$' + s.bid}</span>
+            grid.innerHTML = p.scans.map(s => `
+                <div class="card" style="border-left: 5px solid var(--primary);" onclick="openModal('scanModal')">
+                    <h4 style="margin-bottom: 0.5rem;">${s.area}</h4>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">${s.texture} | ${s.dims}</p>
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+                        <span style="font-weight: bold; color: var(--success);">${s.bid === 'Pending' ? 'Pending Bid' : '$' + parseFloat(s.bid).toLocaleString()}</span>
+                        <span class="badge badge-vendor">${s.bid === 'Pending' ? 'SENT' : 'BID RECEIVED'}</span>
                     </div>
                 </div>
             `).join('');
         }
 
-        // STEP 4: VENDOR BID
-        function submitVendorBid() {
-            const bid = document.getElementById('vPrice').value;
-            if(activeProject.scans.length > 0) {
-                activeProject.scans[activeProject.scans.length - 1].bid = bid;
+        function updateDashboardGrids() {
+            const activeList = projects.filter(p => p.status === 'Active');
+            const archiveList = projects.filter(p => p.status === 'Archived');
+            
+            document.getElementById('projectGrid').innerHTML = activeList.map(p => `
+                <div class="card" onclick="showProjectDetail(${p.id})">
+                    <p style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 800;">ID: ${p.id}</p>
+                    <h3>${p.client}</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">${p.address}</p>
+                    <div style="margin-top: 1rem; display: flex; justify-content: space-between;">
+                        <span class="badge badge-contractor">${p.scans.length} Scan Records</span>
+                        <span style="color: var(--success); font-weight: bold;">Due: ${p.targetDate}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            if(archiveList.length > 0) {
+                document.getElementById('archiveGrid').innerHTML = archiveList.map(p => `
+                    <div class="card" style="opacity: 0.7;" onclick="showProjectDetail(${p.id})">
+                        <h3>${p.client} (Archived)</h3>
+                        <p style="font-size: 0.8rem;">Location: ${p.address}</p>
+                    </div>
+                `).join('');
             }
-            renderScans();
-            hideModal('scanModal');
-            alert("Step 4 Complete: Bid and Timeline data communicated back to Contractor.");
         }
 
-        // STEP 5: REPORTING
-        async function generateReport() {
+        // STEP 5: REPORTING [cite: 47-50]
+        function archiveCurrentProject() {
+            const p = projects.find(item => item.id === activeProjectId);
+            p.status = 'Archived';
+            alert("Step 5: Moving project to Archive for long-term storage.");
+            showDashboard();
+        }
+
+        function generateFormalReport() {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'mm', 'a4');
-            const element = document.getElementById('reportTarget');
+            const doc = new jsPDF();
+            const p = projects.find(item => item.id === activeProjectId);
+
+            // Report Styles
+            const primaryColor = [37, 99, 235];
             
-            alert("Step 5: Generating Professional PDF Quote Report...");
+            // Header
+            doc.setFillColor(30, 41, 59);
+            doc.rect(0, 0, 210, 45, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(24);
+            doc.text("PROJECT QUOTE REPORT", 15, 25);
+            doc.setFontSize(10);
+            doc.text(`Generated: ${new Date().toLocaleDateString()}`, 15, 35);
+
+            // Project Info Section
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold'); doc.text("CLIENT:", 15, 60);
+            doc.setFont(undefined, 'normal'); doc.text(p.client, 45, 60);
             
-            html2canvas(element).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const pdfWidth = doc.internal.pageSize.getWidth();
-                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-                doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-                doc.save("Project_Quote_Summary.pdf");
+            doc.setFont(undefined, 'bold'); doc.text("SITE ADDRESS:", 15, 68);
+            doc.setFont(undefined, 'normal'); doc.text(p.address, 45, 68);
+
+            doc.setFont(undefined, 'bold'); doc.text("MANAGER:", 15, 76);
+            doc.setFont(undefined, 'normal'); doc.text(p.manager, 45, 76);
+
+            // Table for Service Requests
+            const tableRows = p.scans.map(s => [
+                s.area,
+                `${s.texture}\n${s.dims}`,
+                s.notes,
+                s.vDate || "TBD",
+                s.bid === "Pending" ? "Pending" : `$${parseFloat(s.bid).toLocaleString()}`
+            ]);
+
+            doc.autoTable({
+                startY: 85,
+                head: [['SERVICE AREA', 'SPECIFICATIONS', 'FIELD NOTES', 'EST. START', 'BID PRICE']],
+                body: tableRows,
+                headStyles: { fillColor: primaryColor, textColor: 255 },
+                theme: 'grid',
+                styles: { fontSize: 9, cellPadding: 5 }
             });
+
+            // Footer
+            const finalY = doc.lastAutoTable.finalY + 15;
+            doc.setFont(undefined, 'bold');
+            doc.text("FINAL CONFIRMED COMPLETION DATE:", 15, finalY);
+            doc.setFont(undefined, 'normal');
+            doc.text(p.targetDate, 90, finalY);
+
+            doc.setFontSize(8);
+            doc.setTextColor(150);
+            doc.text("This document is a formal project estimate generated via Field Estimator Pro.", 15, 285);
+
+            doc.save(`Project_Report_${p.client.replace(/\s+/g, '_')}.pdf`);
+            alert("Step 5: Professional PDF Quote generated with all line items.");
         }
     </script>
 </body>
