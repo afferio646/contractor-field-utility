@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estimator Pro | Unified Field Documentation Tool</title>
+    <title>Estimator Pro | Unified Field Documentation</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.autotable.min.js"></script>
@@ -12,35 +12,34 @@
         :root {
             --primary: #2563eb; --primary-dark: #1e40af; --bg-dark: #0f172a;
             --bg-card: #1e293b; --text-primary: #f8fafc; --text-secondary: #94a3b8;
-            --border: #334155; --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+            --border: #334155; --success: #10b981; --warning: #f59e0b;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg-dark); color: var(--text-primary); line-height: 1.6; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-dark); color: var(--text-primary); line-height: 1.6; padding-bottom: 40px; }
         
-        /* Layout Components */
+        /* Navigation & Banners */
         .header { background: var(--bg-card); padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .view-banner { background: var(--warning); color: #000; text-align: center; padding: 0.5rem; font-weight: 800; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+        .view-banner { background: var(--warning); color: #000; text-align: center; padding: 0.5rem; font-weight: 800; font-size: 0.75rem; text-transform: uppercase; }
         
-        /* UI Elements */
-        .btn { padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; display: inline-flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+        
+        /* Components */
+        .btn { padding: 0.8rem 1.4rem; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; display: inline-flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-secondary { background: var(--border); color: var(--text-primary); }
         .btn-success { background: var(--success); color: white; }
         .btn-toggle { background: var(--warning); color: #000; border: 2px solid #000; }
         
-        .card { background: var(--bg-card); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border); margin-bottom: 1.5rem; position: relative; transition: transform 0.2s ease; }
-        .card:hover { transform: translateY(-3px); border-color: var(--primary); }
-        
+        .card { background: var(--bg-card); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border); margin-bottom: 1.5rem; position: relative; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
         
-        /* Modals */
+        /* Form & Modals */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
         .modal-content { background: var(--bg-card); width: 100%; max-width: 650px; border-radius: 16px; padding: 2.5rem; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
         
-        .form-group { margin-bottom: 1.5rem; }
-        label { display: block; color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+        .form-group { margin-bottom: 1.25rem; }
+        label { display: block; color: var(--text-secondary); margin-bottom: 0.4rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
         input, select, textarea { width: 100%; padding: 0.85rem; background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; color: white; font-size: 1rem; }
         input:disabled, select:disabled, textarea:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -54,7 +53,7 @@
 </head>
 <body>
 
-    <div id="vBanner" class="view-banner hidden">Vendor Portal Active: Quote & Timeline Submission Mode</div>
+    <div id="vBanner" class="view-banner hidden">Vendor Portal Active: Editing Estimate & Timeline Justification</div>
 
     <header class="header">
         <div>
@@ -70,7 +69,7 @@
     <div class="container">
         <div id="dashboard">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <h1>Active Projects</h1>
+                <h1>Active Job Sites</h1>
                 <button class="btn btn-primary" onclick="showModal('initModal')">+ Create New Project</button>
             </div>
             <div class="grid" id="projectGrid"></div>
@@ -81,7 +80,7 @@
         <div id="vendorManager" class="hidden">
             <button class="btn btn-secondary" onclick="showDashboard()" style="margin-bottom: 2rem;">← Back to Jobs</button>
             <div class="card">
-                <h3>Add Vendor to Network</h3><br>
+                <h3>Manage Subcontractor Network</h3><br>
                 <div class="grid" style="grid-template-columns: 1fr 1fr auto; align-items: end;">
                     <div class="form-group" style="margin:0;"><label>Company Name</label><input type="text" id="vAddName"></div>
                     <div class="form-group" style="margin:0;"><label>Contact Email</label><input type="email" id="vAddEmail"></div>
@@ -93,11 +92,11 @@
 
         <div id="projectDetail" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <button class="btn btn-secondary" onclick="showDashboard()">← Dashboard</button>
-                <button id="archiveJobBtn" class="btn btn-secondary" onclick="archiveCurrentJob()">Archive Job</button>
+                <button class="btn btn-secondary" onclick="showDashboard()">← Back to Dashboard</button>
+                <button id="archiveActionBtn" class="btn btn-secondary" onclick="archiveCurrentJob()">Archive Project</button>
             </div>
             <div class="card">
-                <h1 id="detTitle" style="font-size: 2.4rem; margin-bottom: 0.5rem;">Project Title</h1>
+                <h1 id="detTitle" style="font-size: 2.4rem; margin-bottom: 0.5rem;"></h1>
                 <p id="detMeta" style="color: var(--text-secondary); margin-bottom: 1.5rem;"></p>
                 <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 2rem;">
                     <h3>Standardized Service Requests</h3>
@@ -111,11 +110,11 @@
     <div id="initModal" class="modal hidden">
         <div class="modal-content">
             <h2>Step 1: Project Initiation</h2><br>
-            <div class="form-group"><label>Client Name</label><input type="text" id="mClient" placeholder="e.g. John Anderson"></div>
-            <div class="form-group"><label>Job Site Address</label><input type="text" id="mAddr" placeholder="Street, City, Zip"></div>
-            <div class="form-group"><label>Project Manager</label><input type="text" id="mPM" placeholder="Manager Name"></div>
+            <div class="form-group"><label>Client Name</label><input type="text" id="mClient"></div>
+            <div class="form-group"><label>Job Site Address</label><input type="text" id="mAddr"></div>
+            <div class="form-group"><label>Project Manager</label><input type="text" id="mPM"></div>
             <div class="form-group"><label>Initial Target Completion Date</label><input type="date" id="mDate"></div>
-            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <div style="display: flex; gap: 1rem;">
                 <button class="btn btn-primary" onclick="initiateProject()">Initiate Project</button>
                 <button class="btn btn-secondary" onclick="hideModal('initModal')">Cancel</button>
             </div>
@@ -125,132 +124,126 @@
     <div id="requestModal" class="modal hidden">
         <div class="modal-content">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2 id="modalHeader">Project Request Data</h2>
+                <h2 id="modalHeader">Project Request Detail</h2>
                 <button class="btn btn-secondary" onclick="hideModal('requestModal')">✕</button>
             </div>
-            <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800" class="placeholder-img" alt="Field Photo">
             
-            <div id="requesterSection">
-                <div class="form-group"><label>Area / Location</label><input type="text" id="rArea" class="c-field" placeholder="e.g. Master Bedroom Ceiling"></div>
+            <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800" class="placeholder-img">
+            
+            <div id="contractorForm">
+                <div class="form-group"><label>Area / Location</label>
+                    <select id="rArea" class="c-field">
+                        <option>Master Bedroom</option><option>Kitchen</option><option>Exterior</option><option>Other</option>
+                    </select>
+                </div>
                 <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group"><label>Texture</label>
                         <select id="rTexture" class="c-field">
-                            <option value="Smooth Drywall">Smooth Drywall</option>
-                            <option value="Stucco">Stucco</option>
-                            <option value="Popcorn">Popcorn</option>
+                            <option>Smooth Drywall</option><option>Stucco</option><option>Popcorn</option>
                         </select>
                     </div>
                     <div class="form-group"><label>Color Match</label><input type="text" id="rColor" class="c-field" placeholder="e.g. SW 7006"></div>
                 </div>
-                <div class="form-group"><label>Dimensions</label><input type="text" id="rDims" class="c-field" placeholder="e.g. 12ft x 14ft"></div>
-                <div class="form-group"><label>Required Action / Notes</label><textarea id="rNotes" class="c-field" rows="2" placeholder="Describe damage or service..."></textarea></div>
+                <div class="form-group"><label>Dimensions</label><input type="text" id="rDims" class="c-field" placeholder="e.g. 10' x 12'"></div>
+                <div class="form-group"><label>Required Action / Notes</label><textarea id="rNotes" class="c-field" rows="3" placeholder="Describe damage..."></textarea></div>
                 
-                <div id="handoffUI" style="border-top: 1px solid var(--border); padding-top: 1.5rem; margin-top: 1rem;">
-                    <label>Select Recipient Vendor</label>
+                <div id="handoffBox" style="border-top: 1px solid var(--border); padding-top: 1.5rem; margin-top: 1rem;">
+                    <label>Select Vendor for Bid</label>
                     <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;"><select id="vDropdown" style="flex:1;"></select></div>
                     <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                        <button class="btn btn-primary" onclick="sendHandoff('Email')">Send via Email</button>
-                        <button class="btn btn-secondary" onclick="sendHandoff('App')">Send via App</button>
+                        <button class="btn btn-primary" onclick="executeHandoff('Email')">Send via Email</button>
+                        <button class="btn btn-secondary" onclick="executeHandoff('App')">Send via App</button>
                     </div>
                 </div>
             </div>
 
-            <div id="responderSection" class="hidden" style="border-top: 3px solid var(--warning); padding-top: 1.5rem; margin-top: 1.5rem;">
-                <h3 style="color: var(--warning); margin-bottom: 1.25rem;">Vendor Response (Estimate & Timeline)</h3>
+            <div id="vendorForm" class="hidden" style="border-top: 3px solid var(--warning); padding-top: 1.5rem; margin-top: 1.5rem;">
+                <h3 style="color: var(--warning); margin-bottom: 1rem;">Subcontractor Bid & Timeline Justification</h3>
                 <div class="form-group"><label>Estimate Price ($)</label><input type="number" id="vBid" placeholder="0.00"></div>
-                <div class="form-group"><label>Estimated Start Date</label><input type="date" id="vDate"></div>
-                <div class="form-group"><label>Timeline Notes / Justification</label><textarea id="vNotes" rows="2" placeholder="e.g. Requires lead time for materials..."></textarea></div>
-                <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem;">
-                    <input type="checkbox" id="vMailConfirm" style="width:auto;"> <label style="margin:0;">Quote sent via external email</label>
+                <div class="form-group"><label>Proposed Start Date</label><input type="date" id="vDate"></div>
+                <div class="form-group"><label>Timeline Notes</label><textarea id="vNotes" rows="2" placeholder="Describe any material delays..."></textarea></div>
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                    <input type="checkbox" id="vCheck" style="width: auto;"> <label style="margin:0;">Quote sent via external email</label>
                 </div>
-                <button class="btn btn-primary" style="width: 100%;" onclick="submitVendorResponse()">Submit Estimate & Timeline</button>
+                <button class="btn btn-primary" style="width: 100%;" onclick="saveVendorBid()">Submit Estimate & Timeline</button>
             </div>
 
-            <div style="margin-top: 2rem;"><button id="contractorSaveBtn" class="btn btn-primary" onclick="saveProjectRequest()">Save Documentation</button></div>
+            <div style="margin-top: 1.5rem;"><button id="saveReqBtn" class="btn btn-primary" onclick="saveFieldData()">Save Project Request</button></div>
         </div>
     </div>
 
     <script>
-        // SYSTEM STATE & DATA
+        // CORE STATE [cite: 116]
         let projects = []; 
         let vendors = [{name: 'Elite Drywall', email: 'bids@elitedrywall.com'}]; 
-        let currentProject = null; 
-        let currentRole = 'contractor';
+        let activeProject = null; 
+        let role = 'contractor';
 
-        // UI HELPERS
+        // NAVIGATION
         function showView(id) { document.querySelectorAll('.container > div').forEach(v => v.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); if(id==='dashboard') renderDashboard(); }
         function showDashboard() { showView('dashboard'); }
         function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        // STEP 3/4: DUAL PERSPECTIVE TOGGLE [cite: 67-68, 94, 113]
+        // ROLE TOGGLE (STEP 3/4 LOGIC) [cite: 67-68, 94, 113]
         function toggleRole() {
-            currentRole = (currentRole === 'contractor') ? 'vendor' : 'contractor';
-            document.getElementById('roleBadge').innerText = (currentRole === 'contractor') ? 'Main Contractor' : 'Subcontractor';
+            role = (role === 'contractor') ? 'vendor' : 'contractor';
+            document.getElementById('roleBadge').innerText = (role === 'contractor') ? 'Main Contractor' : 'Subcontractor';
             document.getElementById('roleBadge').className = 'badge ' + (role === 'contractor' ? 'badge-contractor' : 'badge-vendor');
             document.getElementById('vBanner').classList.toggle('hidden');
-            document.getElementById('responderSection').classList.toggle('hidden');
-            document.getElementById('handoffUI').classList.toggle('hidden');
-            document.getElementById('contractorSaveBtn').classList.toggle('hidden');
+            document.getElementById('vendorForm').classList.toggle('hidden');
+            document.getElementById('handoffBox').classList.toggle('hidden');
+            document.getElementById('saveReqBtn').classList.toggle('hidden');
             document.getElementById('addReqBtn').classList.toggle('hidden');
-            document.getElementById('archiveJobBtn').classList.toggle('hidden');
-            document.querySelectorAll('.c-field').forEach(i => i.disabled = (currentRole === 'vendor'));
-            alert(`Demo Context: System toggled to ${currentRole.toUpperCase()} mode.`);
+            document.getElementById('archiveActionBtn').classList.toggle('hidden');
+            document.querySelectorAll('.c-field').forEach(i => i.disabled = (role === 'vendor'));
         }
 
-        // VENDOR LIST LOGIC [cite: 89, 92]
+        // VENDOR SETUP
         function saveNewVendor() {
             const n = document.getElementById('vAddName').value; const e = document.getElementById('vAddEmail').value;
-            if(n && e) { vendors.push({name: n, email: e}); renderVendorRegistry(); document.getElementById('vAddName').value=''; document.getElementById('vAddEmail').value=''; }
+            if(n && e) { vendors.push({name: n, email: e}); renderVendorNetwork(); document.getElementById('vAddName').value=''; document.getElementById('vAddEmail').value=''; }
         }
-        function renderVendorRegistry() {
-            document.getElementById('vendorRegistryList').innerHTML = vendors.map(v => `<div class="card" style="padding:1rem; display:flex; justify-content:space-between;"><span>${v.name}</span><span style="color:var(--text-secondary);">${v.email}</span></div>`).join('');
-            document.getElementById('vDropdown').innerHTML = vendors.map(v => `<option value="${v.email}">${v.name} (${v.email})</option>`).join('');
+        function renderVendorNetwork() {
+            document.getElementById('vendorRegistryList').innerHTML = vendors.map(v => `<div class="card" style="padding:1rem;">${v.name} (${v.email})</div>`).join('');
+            document.getElementById('vDropdown').innerHTML = vendors.map(v => `<option value="${v.email}">${v.name}</option>`).join('');
         }
 
-        // STEP 1: PROJECT INITIATION [cite: 71-74, 113]
+        // STEP 1: INITIATION [cite: 71-73]
         function initiateProject() {
-            const p = {
-                id: Date.now(),
-                client: document.getElementById('mClient').value,
-                addr: document.getElementById('mAddr').value,
-                pm: document.getElementById('mPM').value,
-                date: document.getElementById('mDate').value,
-                status: 'Active',
-                scans: []
-            };
-            if(!p.client || !p.addr) return alert("Required fields: Client and Address");
-            projects.push(p); openProject(p.id); hideModal('initModal');
+            const p = { id: Date.now(), client: document.getElementById('mClient').value, addr: document.getElementById('mAddr').value, pm: document.getElementById('mPM').value, date: document.getElementById('mDate').value, status: 'Active', scans: [] };
+            if(!p.client || !p.addr) return alert("Required fields missing.");
+            projects.push(p); openWorkspace(p.id); hideModal('initModal');
         }
 
         function renderDashboard() {
-            const activeGrid = document.getElementById('projectGrid');
-            activeGrid.innerHTML = projects.filter(p => p.status === 'Active').map(p => `
-                <div class="card" onclick="openProject(${p.id})">
+            const grid = document.getElementById('projectGrid');
+            grid.innerHTML = projects.filter(p => p.status === 'Active').map(p => `
+                <div class="card" onclick="openWorkspace(${p.id})">
                     <p style="font-size:0.7rem; color:var(--text-secondary); font-weight:800;">ID: ${p.id}</p>
-                    <h3 style="margin:0.25rem 0;">${p.client}</h3><p style="font-size:0.85rem;">${p.addr}</p>
-                    <div style="margin-top:1.25rem; display:flex; justify-content:space-between; align-items:center;">
+                    <h3>${p.client}</h3><p style="font-size:0.85rem;">${p.addr}</p>
+                    <div style="margin-top:1.25rem; display:flex; justify-content:space-between;">
                         <span class="badge badge-contractor">${p.scans.length} Project Requests</span>
-                        <span style="color:var(--success); font-weight:bold; font-size:0.8rem;">Target: ${p.date}</span>
+                        <span style="color:var(--success); font-weight:bold;">${p.date}</span>
                     </div>
                 </div>`).join('');
             
-            const archGrid = document.getElementById('archiveGrid');
-            archGrid.innerHTML = projects.filter(p => p.status === 'Archived').map(p => `<div class="card" style="opacity:0.6;" onclick="openProject(${p.id})"><h3>${p.client} (Archived)</h3><p>${p.addr}</p></div>`).join('');
+            const arch = document.getElementById('archiveGrid');
+            arch.innerHTML = projects.filter(p => p.status === 'Archived').map(p => `<div class="card" style="opacity:0.6;" onclick="openWorkspace(${p.id})"><h3>${p.client} (Archived)</h3><p>${p.addr}</p></div>`).join('');
         }
 
-        // STEP 2: FIELD DATA CAPTURE [cite: 75-85, 113]
-        function openProject(id) {
-            currentProject = projects.find(p => p.id === id);
-            document.getElementById('detTitle').innerText = currentProject.client;
-            document.getElementById('detMeta').innerText = `${currentProject.addr} | Manager: ${currentProject.pm} | Target: ${currentProject.date}`;
+        // STEP 2: CAPTURE [cite: 75-85]
+        function openWorkspace(id) {
+            activeProject = projects.find(p => p.id === id);
+            document.getElementById('detTitle').innerText = activeProject.client;
+            document.getElementById('detMeta').innerText = `${activeProject.addr} | Manager: ${activeProject.pm} | Target: ${activeProject.date}`;
             renderRequestGrid(); showView('projectDetail');
         }
 
-        function triggerCamera() { alert("Step 2: Activating Camera/Gallery... Photo captured and attached to request."); showModal('requestModal'); }
+        function triggerCamera() { alert("Step 2: Accessing Phone Camera... Photo Attached."); showModal('requestModal'); }
 
-        function saveProjectRequest() {
-            currentProject.scans.push({
+        function saveFieldData() {
+            activeProject.scans.push({
                 id: Date.now(),
                 area: document.getElementById('rArea').value,
                 texture: document.getElementById('rTexture').value,
@@ -263,31 +256,31 @@
             document.querySelectorAll('.c-field').forEach(i => i.value = '');
         }
 
-        // STEP 3: ESTIMATE REQUEST [cite: 86-93, 113]
-        function sendHandoff(method) {
-            const s = currentProject.scans[currentProject.scans.length - 1];
+        // STEP 3: HANDOFF [cite: 86-93]
+        function executeHandoff(method) {
+            const s = activeProject.scans[activeProject.scans.length - 1];
             s.vendor = document.getElementById('vDropdown').value;
             s.method = method;
-            alert(`Step 3: Project Request Data and Professional PDF sent to ${s.vendor} via ${method}.`);
+            alert(`Step 3: Project Request ${method === 'Email' ? 'PDF' : 'Data'} shared with ${s.vendor}.`);
         }
 
-        // STEP 4: VENDOR SUBMISSION [cite: 96-107, 113]
-        function submitVendorResponse() {
-            const s = currentProject.scans[currentProject.scans.length - 1];
+        // STEP 4: VENDOR RESPONSE [cite: 96-107]
+        function saveVendorBid() {
+            const s = activeProject.scans[activeProject.scans.length - 1];
             s.bid = document.getElementById('vBid').value;
             s.vDate = document.getElementById('vDate').value;
             s.vNotes = document.getElementById('vNotes').value;
             renderRequestGrid(); hideModal('requestModal');
-            alert("Step 4: Bid and updated Timeline submitted back to original Project Folder.");
+            alert("Step 4: Bid and Timeline received and saved to Project Folder.");
         }
 
         function renderRequestGrid() {
             const grid = document.getElementById('requestGrid');
-            grid.innerHTML = currentProject.scans.map(s => `
+            grid.innerHTML = activeProject.scans.map(s => `
                 <div class="card" style="border-left:5px solid var(--primary);" onclick="showModal('requestModal')">
                     <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:1rem;">
                         <div><h4>${s.area}</h4><p style="font-size:0.8rem; color:var(--text-secondary);">${s.texture} | ${s.dims}</p></div>
-                        <button class="btn btn-success" style="padding:0.4rem; font-size:0.75rem;" onclick="event.stopPropagation(); buildSideBySideReport(${s.id})">
+                        <button class="btn btn-success" style="padding:0.4rem; font-size:0.75rem;" onclick="event.stopPropagation(); generateSideBySidePDF(${s.id})">
                             Review ${s.bid ? 'Quote' : 'Request'}
                         </button>
                     </div>
@@ -298,55 +291,43 @@
                 </div>`).join('');
         }
 
-        // STEP 5: SIDE-BY-SIDE REPORTING [cite: 108-111, 113]
-        function archiveCurrentJob() { currentProject.status = 'Archived'; showDashboard(); alert("Step 5: Project archived for long-term storage."); }
+        // STEP 5: COMPARISON REPORT [cite: 108-110]
+        function archiveCurrentJob() { activeProject.status = 'Archived'; showDashboard(); alert("Step 5: Project archived."); }
 
-        function buildSideBySideReport(scanId) {
-            const s = currentProject.scans.find(scan => scan.id === scanId);
-            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+        function generateSideBySidePDF(scanId) {
+            const s = activeProject.scans.find(scan => scan.id === scanId);
+            const { jsPDF } = window.jspdf; 
+            if (!jsPDF) return alert("Reporting engine still loading... wait 1 second.");
+            const doc = new jsPDF();
             
-            // Layout Logic: Header
+            // Header Logic [cite: 110]
             doc.setFillColor(30, 41, 59); doc.rect(0, 0, 210, 45, 'F');
             doc.setTextColor(255, 255, 255); doc.setFontSize(22);
             doc.text(s.bid ? "PROJECT ESTIMATE & QUOTE COMPARISON" : "PROJECT ESTIMATE REQUEST", 15, 25);
-            doc.setFontSize(10); doc.text(`Reference: ${s.id} | Date: ${new Date().toLocaleDateString()}`, 15, 35);
             
-            // Layout Logic: Client & Site Meta
-            doc.setTextColor(0,0,0); doc.setFontSize(10);
-            doc.setFont(undefined, 'bold'); doc.text("CLIENT:", 15, 58); doc.setFont(undefined, 'normal'); doc.text(currentProject.client, 45, 58);
-            doc.setFont(undefined, 'bold'); doc.text("SITE:", 15, 64); doc.setFont(undefined, 'normal'); doc.text(currentProject.addr, 45, 64);
-            doc.setFont(undefined, 'bold'); doc.text("VENDOR:", 110, 58); doc.setFont(undefined, 'normal'); doc.text(s.vendor || 'Awaiting Assignment', 135, 58);
-
-            // Industry Standard Table: Request (Left) vs. Response (Right)
-            const rows = [
-                ['Service Area', s.area, 'Estimated Quote', s.bid ? `$${parseFloat(s.bid).toLocaleString()}` : 'PENDING'],
-                ['Surface Texture', s.texture, 'Estimated Start', s.vDate || currentProject.date],
-                ['Color Match Code', s.color, 'Timeline Notes', s.vNotes || 'Awaiting Vendor Feedback'],
+            // Side-by-Side Table 
+            const tableBody = [
+                ['Area / Location', s.area, 'Estimated Quote', s.bid ? `$${parseFloat(s.bid).toLocaleString()}` : 'PENDING'],
+                ['Texture', s.texture, 'Estimated Start', s.vDate || activeProject.date],
+                ['Color Match', s.color, 'Timeline Notes', s.vNotes || 'Waiting for Vendor'],
                 ['Dimensions', s.dims, '', ''],
                 ['Field Notes', s.notes, '', '']
             ];
 
             doc.autoTable({
-                startY: 75,
+                startY: 65,
                 head: [['CONTRACTOR REQUEST', 'SPECIFICATIONS', 'VENDOR RESPONSE', 'DATA']],
-                body: rows,
+                body: tableBody,
                 theme: 'grid',
-                headStyles: { fillColor: [37, 99, 235], textColor: 255 },
+                headStyles: { fillColor: [37, 99, 235] },
                 columnStyles: { 0: { fontStyle: 'bold', width: 40 }, 2: { fontStyle: 'bold', textColor: [245, 158, 11], width: 40 } },
                 styles: { fontSize: 8, cellPadding: 5 }
             });
 
-            // Final Metadata & Footer
-            const endY = doc.lastAutoTable.finalY + 15;
-            doc.setFont(undefined, 'bold'); doc.text("FINAL TARGET COMPLETION DATE:", 15, endY);
-            doc.setFont(undefined, 'normal'); doc.text(s.vDate || currentProject.date, 85, endY);
-            doc.setFontSize(8); doc.setTextColor(150);
-            doc.text("Generated via Estimator Pro Field Utility. This is a professional industry document.", 15, 285);
-            
-            doc.save(`${currentProject.client.replace(/\s+/g, '_')}_Comparison_Report.pdf`);
+            doc.save(`${activeProject.client}_Comparison_Report.pdf`);
         }
 
-        renderVendorRegistry();
+        renderVendorNetwork();
     </script>
 </body>
 </html>
