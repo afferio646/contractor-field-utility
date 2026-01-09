@@ -28,30 +28,31 @@
         .badge { padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; border: 1px solid transparent; }
         .badge-contractor { background: rgba(37, 99, 235, 0.2); color: var(--primary); border-color: var(--primary); }
         .badge-vendor { background: rgba(245, 158, 11, 0.2); color: var(--warning); border-color: var(--warning); }
+        .badge-sent { background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: var(--success); }
 
         /* Grids & Cards */
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
         .card { background: var(--bg-card); border-radius: 12px; padding: 1.8rem; border: 1px solid var(--border); margin-bottom: 1.5rem; position: relative; transition: 0.3s; }
         .card:hover { border-color: var(--primary); transform: translateY(-4px); }
 
-        /* Modals (Project Entry & Reporting) */
+        /* Modals */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 500; padding: 1rem; }
-        .modal-content { background: var(--bg-card); width: 100%; max-width: 700px; border-radius: 16px; padding: 2.5rem; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
-        .report-modal { background: #fff; color: #000; width: 100%; max-width: 950px; border-radius: 4px; padding: 40px; max-height: 95vh; overflow-y: auto; }
-
-        /* Forms */
-        .form-group { margin-bottom: 1.5rem; }
-        label { display: block; color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; }
-        input, select, textarea { width: 100%; padding: 0.85rem; background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; color: white; font-size: 1rem; }
-        input:disabled, select:disabled, textarea:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        /* Report Specific Styling */
+        .modal-content { background: var(--bg-card); width: 100%; max-width: 700px; border-radius: 16px; padding: 2.5rem; max-height: 95vh; overflow-y: auto; border: 1px solid var(--border); }
+        
+        /* Report Modal Styles */
+        .report-modal { background: #fff; color: #000; width: 100%; max-width: 950px; border-radius: 4px; padding: 40px; max-height: 95vh; overflow-y: auto; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
         .report-header { border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end; }
         .report-table { width: 100%; border-collapse: collapse; margin-top: 20px; border: 1px solid #000; }
         .report-table th { background: #e2e8f0; text-align: left; padding: 12px; border: 1px solid #000; font-size: 0.75rem; text-transform: uppercase; }
         .report-table td { padding: 15px; border: 1px solid #000; vertical-align: top; font-size: 0.9rem; }
         .col-req { width: 50%; background: #f8fafc; }
         .col-res { width: 50%; background: #ffffff; }
+
+        /* Forms */
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; }
+        input, select, textarea { width: 100%; padding: 0.85rem; background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; color: white; font-size: 1rem; }
+        input:disabled, select:disabled, textarea:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .hidden { display: none !important; }
         .field-photo-preview { width: 100%; height: 250px; background: #000; border-radius: 12px; margin-bottom: 1.5rem; object-fit: cover; }
@@ -84,7 +85,7 @@
                     <h2 style="margin: 0.3rem 0; font-size: 1.8rem;">Jones</h2>
                     <p style="font-size:0.9rem; color:var(--text-secondary);">123 main street</p>
                     <div style="margin-top:1.5rem; display:flex; justify-content:space-between; align-items:center;">
-                        <span class="badge badge-contractor">1 Project Request</span>
+                        <span id="dashRequestCount" class="badge badge-contractor">1 Project Request</span>
                         <span style="color:var(--success); font-weight:bold;">03/30/2026</span>
                     </div>
                 </div>
@@ -243,7 +244,7 @@
     </div>
 
     <script>
-        // CORE STATE & HARDCODED DEMO DATA
+        // CORE STATE & HARDCODED DEMO DATA [cite: 59-61]
         let role = 'contractor';
         let projects = [
             {
@@ -277,7 +278,7 @@
         function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        // PERSPECTIVE TOGGLE (STEP 3/4)
+        // PERSPECTIVE TOGGLE (STEP 3/4) [cite: 39-41]
         function togglePerspective() {
             role = (role === 'contractor') ? 'vendor' : 'contractor';
             document.getElementById('roleBadge').innerText = (role === 'contractor') ? 'Main Contractor' : 'Subcontractor';
@@ -288,9 +289,10 @@
             document.getElementById('saveReqBtn').classList.toggle('hidden');
             document.getElementById('addReqBtn').classList.toggle('hidden');
             document.querySelectorAll('.c-field').forEach(i => i.disabled = (role === 'vendor'));
+            renderScans(); // Re-render to update perspective-specific labels
         }
 
-        // STEP 1: INITIATION
+        // STEP 1: INITIATION [cite: 18]
         function saveNewProject() {
             const p = {
                 id: Date.now(),
@@ -319,7 +321,7 @@
                 </div>`).join('');
         }
 
-        // STEP 2: DETAIL & CAPTURE
+        // STEP 2: DETAIL & CAPTURE [cite: 20-30]
         function openProject(id) {
             activeP = projects.find(p => p.id == id);
             document.getElementById('detTitle').innerText = activeP.client;
@@ -344,7 +346,7 @@
             hideModal('requestEntryModal');
         }
 
-        // STEP 4: VENDOR BID
+        // STEP 4: VENDOR BID [cite: 41-52]
         function submitVendorBid() {
             const s = activeP.scans[activeP.scans.length - 1];
             s.bid = document.getElementById('vBid').value || 2500;
@@ -352,24 +354,41 @@
             s.vNotes = document.getElementById('vNotes').value || "additional photos will be needed...";
             renderScans();
             hideModal('requestEntryModal');
+            alert("Bid Submitted! Status updated to BID SENT.");
         }
 
         function renderScans() {
             const grid = document.getElementById('scanRecordGrid');
-            grid.innerHTML = activeP.scans.map(s => `
+            grid.innerHTML = activeP.scans.map(s => {
+                // FIXED LABEL LOGIC:
+                let statusLabel = "";
+                let badgeClass = "";
+                
+                if (role === 'vendor') {
+                    // Perspective: Subcontractor
+                    statusLabel = (s.bid === null) ? 'PENDING' : 'BID SENT';
+                    badgeClass = (s.bid === null) ? 'badge-contractor' : 'badge-sent';
+                } else {
+                    // Perspective: Main Contractor
+                    statusLabel = (s.bid === null) ? 'SENT' : 'BID RECEIVED';
+                    badgeClass = (s.bid === null) ? 'badge-contractor' : 'badge-vendor';
+                }
+
+                return `
                 <div class="card" style="border-left:5px solid var(--primary);" onclick="showModal('requestEntryModal')">
                     <div style="display:flex; justify-content:space-between; align-items:start;">
                         <div><h4>${s.area}</h4><p style="font-size:0.8rem; color:var(--text-secondary);">${s.texture} | ${s.dims}</p></div>
                         <button class="btn btn-success" style="padding:0.4rem; font-size:0.7rem;" onclick="event.stopPropagation(); launchReport(${s.id})">Review Report</button>
                     </div>
                     <div style="margin-top:1rem; border-top:1px solid var(--border); padding-top:1rem; display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-weight:900; color:var(--success);">${s.bid ? '$'+parseFloat(s.bid).toLocaleString() : 'Pending Bid'}</span>
-                        <span class="badge ${s.bid ? 'badge-vendor' : 'badge-contractor'}">${s.bid ? 'BID RECEIVED' : 'SENT'}</span>
+                        <span style="font-weight:900; color:var(--success); font-size:1.1rem;">${s.bid ? '$'+parseFloat(s.bid).toLocaleString() : 'Pending Bid'}</span>
+                        <span class="badge ${badgeClass}">${statusLabel}</span>
                     </div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
         }
 
-        // STEP 5: THE REPORTING LOGIC
+        // STEP 5: THE REPORTING LOGIC [cite: 55]
         function launchReport(scanId) {
             const s = activeP.scans.find(scan => scan.id == scanId);
             
@@ -381,7 +400,7 @@
             document.getElementById('repNotes').innerText = s.notes;
             document.getElementById('repTargetDate').innerText = activeP.date;
 
-            // Map Response Data (Logic for Jones Demo)
+            // Map Response Data
             if(s.bid) {
                 document.getElementById('repStatusLabel').innerText = "QUOTE FINALIZED";
                 document.getElementById('repStatusLabel').style.color = "var(--success)";
